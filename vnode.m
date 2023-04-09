@@ -1,9 +1,13 @@
 #include "vnode.h"
+#include "libproc.h"
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #include "SVC_Caller.h"
 #include "kernel.h"
 #include "libdimentio.h"
+
+
+
 
 const char *vnodeMemPath;
 NSArray *hidePathList = nil;

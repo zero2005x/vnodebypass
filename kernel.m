@@ -5,6 +5,9 @@
 #define kCFCoreFoundationVersionNumber_iOS_13_0_b2 (1656)
 #define kCFCoreFoundationVersionNumber_iOS_13_0_b1 (1652.20)
 #define kCFCoreFoundationVersionNumber_iOS_14_0_b1 (1740)
+#ifndef kCFCoreFoundationVersionNumber_iOS_15_0
+#define kCFCoreFoundationVersionNumber_iOS_15_0 1854
+#endif
 
 uint32_t off_p_pid = 0;
 uint32_t off_p_pfd = 0;
@@ -66,7 +69,14 @@ int offset_init() {
 uint64_t get_vnode_with_file_index(int file_index, uint64_t proc) {
 	uint64_t filedesc = kernel_read64(proc + off_p_pfd);
 	uint64_t fileproc = kernel_read64(filedesc + off_fd_ofiles);
-	uint64_t openedfile = kernel_read64(fileproc  + (sizeof(void*) * file_index));
+	//uint64_t openedfile = kernel_read64(fileproc  + (sizeof(void*) * file_index));
+
+	uint64_t openedfile = 0;
+	if(kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_15_0)
+		openedfile = kernel_read64(filedesc + (8 * file_index));
+	else
+		openedfile = kernel_read64(fileproc + (8 * file_index));
+
 	uint64_t fileglob = kernel_read64(openedfile + off_fp_fglob);
 	uint64_t vnode = kernel_read64(fileglob + off_fg_data);
 

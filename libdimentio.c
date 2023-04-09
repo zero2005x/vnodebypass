@@ -20,7 +20,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <dlfcn.h>
-#include <libproc.h>
+#include "libproc.h"
+//#include <libproc.h>
 
 #define LZSS_F (18)
 #define LZSS_N (4096)
