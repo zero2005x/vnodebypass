@@ -125,9 +125,9 @@ uint64_t get_vnode_with_file_index(int file_index, uint64_t proc) {
 
 	
 
-	if(kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_7_3 || kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_1)
+	if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_15_0)  
 		openedfile = kernel_read64(filedesc + (8 * file_index));
-	else if(kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_15_0) 
+	else if(kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_7_3 || kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_1)
 		openedfile = kernel_read64(fileproc + (8 * file_index));
 	else
 		printf("not the case I mentioned!\n");
