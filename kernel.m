@@ -5,8 +5,24 @@
 #define kCFCoreFoundationVersionNumber_iOS_13_0_b2 (1656)
 #define kCFCoreFoundationVersionNumber_iOS_13_0_b1 (1652.20)
 #define kCFCoreFoundationVersionNumber_iOS_14_0_b1 (1740)
+
 #ifndef kCFCoreFoundationVersionNumber_iOS_15_0
 #define kCFCoreFoundationVersionNumber_iOS_15_0 1854
+#endif
+#ifndef kCFCoreFoundationVersionNumber_iOS_15_1
+#define kCFCoreFoundationVersionNumber_iOS_15_1 1855.105
+#endif
+#ifndef kCFCoreFoundationVersionNumber_iOS_15_2
+#define kCFCoreFoundationVersionNumber_iOS_15_2 1856.105
+#endif
+#ifndef kCFCoreFoundationVersionNumber_iOS_15_3
+#define kCFCoreFoundationVersionNumber_iOS_15_3 1856.105
+#endif
+#ifndef kCFCoreFoundationVersionNumber_iOS_15_4
+#define kCFCoreFoundationVersionNumber_iOS_15_4 1858.112
+#endif
+#ifndef kCFCoreFoundationVersionNumber_iOS_15_7_3
+#define kCFCoreFoundationVersionNumber_iOS_15_7_3 1740
 #endif
 
 uint32_t off_p_pid = 0;
@@ -19,6 +35,10 @@ uint32_t off_vnode_usecount = 0;
 uint32_t off_vnode_vflags = 0;
 
 int offset_init() {
+
+	
+
+
 	if(kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_14_0_b1) {
 		// ios 14
 		printf("iOS 14.x offset selected!!!\n");
@@ -62,6 +82,38 @@ int offset_init() {
 		return 0;
 	}
 
+	if(kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_15_7_3) {
+		// ios 14
+		printf("iOS 15.7.3 offset selected!!!\n");
+		off_p_pid = 0x68;
+		off_p_pfd = 0xf8;
+		off_fd_ofiles = 0x0;
+		off_fp_fglob = 0x10;
+		off_fg_data = 0x38;
+		off_vnode_iocount = 0x64;
+		off_vnode_usecount = 0x60;
+		off_vnode_vflags = 0x54;
+		return 0;
+	}
+
+	if(kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_0 ||
+	kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_2 ||
+	kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_3 ||
+	kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_4 
+	) {
+		// ios 14
+		printf("iOS 15.0 || 15.2 || 15.3 || 15.4 offset selected!!!\n");
+		off_p_pid = 0x68;
+		off_p_pfd = 0x100;
+		off_fd_ofiles = 0x0;
+		off_fp_fglob = 0x10;
+		off_fg_data = 0x38;
+		off_vnode_iocount = 0x64;
+		off_vnode_usecount = 0x60;
+		off_vnode_vflags = 0x54;
+		return 0;
+	}
+
 	return -1;
 }
 
@@ -69,13 +121,16 @@ int offset_init() {
 uint64_t get_vnode_with_file_index(int file_index, uint64_t proc) {
 	uint64_t filedesc = kernel_read64(proc + off_p_pfd);
 	uint64_t fileproc = kernel_read64(filedesc + off_fd_ofiles);
-	//uint64_t openedfile = kernel_read64(fileproc  + (sizeof(void*) * file_index));
+	uint64_t openedfile = kernel_read64(fileproc  + (sizeof(void*) * file_index));
 
-	uint64_t openedfile = 0;
-	if(kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_15_0)
+	
+
+	if(kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_7_3 || kCFCoreFoundationVersionNumber == kCFCoreFoundationVersionNumber_iOS_15_1)
 		openedfile = kernel_read64(filedesc + (8 * file_index));
-	else
+	else if(kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_15_0) 
 		openedfile = kernel_read64(fileproc + (8 * file_index));
+	else
+		printf("not the case I mentioned!\n");
 
 	uint64_t fileglob = kernel_read64(openedfile + off_fp_fglob);
 	uint64_t vnode = kernel_read64(fileglob + off_fg_data);
